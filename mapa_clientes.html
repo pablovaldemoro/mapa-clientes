@@ -1,49 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <title>Mapa de Clientes (ES / PT)</title>
-
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <style>
-    html, body { height:100%; margin:0; font-family: system-ui, -apple-system, "Segoe UI", Arial; }
-    header {
-      background:#222; color:#fff; padding:10px 14px; display:flex; flex-direction:column; gap:8px;
-    }
-    header h1 { font-size:18px; margin:0; }
-    #status { font-size:13px; color:#ddd; }
-    #map { height: calc(100% - 92px); }
-
-    .legend {
-      position:absolute; bottom:12px; left:12px; background:#fff; padding:8px 10px;
-      border-radius:6px; box-shadow:0 1px 4px rgba(0,0,0,.3); font-size:12px; z-index:1000;
-    }
-    .legend-item { display:flex; align-items:center; margin:4px 0; }
-    .legend-color { width:12px; height:12px; border-radius:50%; margin-right:6px; }
-  </style>
+<meta charset="utf-8"/>
+<title>Mapa Clientes – España (coordenadas estimadas)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  html, body { height:100%; margin:0; font-family: sans-serif; }
+  #map { height:100%; }
+  .legend {
+    position:absolute;
+    bottom:12px; left:12px;
+    background:#fff; padding:8px 10px;
+    border-radius:6px; box-shadow:0 1px 4px rgba(0,0,0,0.3);
+    font-size:12px; z-index:1000;
+  }
+  .legend-item { display:flex; align-items:center; margin:4px 0; }
+  .legend-color { width:12px; height:12px; border-radius:50%; margin-right:6px; }
+</style>
 </head>
 <body>
-
-<header>
-  <h1>Mapa de Clientes (España y Portugal)</h1>
-  <div id="status">Cargando datos…</div>
-</header>
-
 <div id="map"></div>
-
 <div class="legend">
-  <strong>Leyenda</strong>
-  <div class="legend-item"><div class="legend-color" style="background:#1f77b4;"></div>Perfume and Cosmetic</div>
-  <div class="legend-item"><div class="legend-color" style="background:#d62728;"></div>Food and Beverage</div>
-  <div class="legend-item"><div class="legend-color" style="background:#2ca02c;"></div>Detergence and Chemistry</div>
-  <div class="legend-item"><div class="legend-color" style="background:#9467bd;"></div>Nutrition and Pharma</div>
+  <strong>Leyenda</strong><br>
+  <div class="legend-item"><span class="legend-color" style="background:#1f77b4;"></span>Perfume and Cosmetic</div>
+  <div class="legend-item"><span class="legend-color" style="background:#d62728;"></span>Food and Beverage</div>
+  <div class="legend-item"><span class="legend-color" style="background:#2ca02c;"></span>Detergence and Chemistry</div>
+  <div class="legend-item"><span class="legend-color" style="background:#9467bd;"></span>Nutrition and Pharma</div>
 </div>
-
 <script>
-// ------------------ DATOS LEÍDOS DEL WORD ------------------
+// Lista de clientes
 const CLIENTES = [
   {empresa:"Aguardientes de Galicia", municipio:"Vedra", sector:"Food and Beverage"},
   {empresa:"Alcoholera Catalana", municipio:"Santa Margarida i Els Monjos", sector:"Detergence and Chemistry"},
@@ -52,17 +38,17 @@ const CLIENTES = [
   {empresa:"Alcoprodis", municipio:"Aldaia", sector:"Detergence and Chemistry"},
   {empresa:"Antonio Nadal", municipio:"Marratxí", sector:"Food and Beverage"},
   {empresa:"Antonio Puig", municipio:"Barcelona", sector:"Perfume and Cosmetic"},
-  {empresa:"Bacardi", municipio:"Mollet del Vallès", sector:"Food and Beverage"},
+  {empresa:"Bacardi", municipio:"Mollet del Valles", sector:"Food and Beverage"},
   {empresa:"Bardinet", municipio:"Gélida", sector:"Food and Beverage"},
   {empresa:"Beam Spain", municipio:"Valverde de Majano", sector:"Food and Beverage"},
   {empresa:"Beiesdorf", municipio:"Tres Cantos", sector:"Perfume and Cosmetic"},
   {empresa:"Benito Parraga", municipio:"Murcia", sector:"Nutrition and Pharma"},
   {empresa:"Berioska", municipio:"Cheste", sector:"Perfume and Cosmetic"},
   {empresa:"Berkem", municipio:"Quart de Poblet", sector:"Food and Beverage"},
-  {empresa:"Beveland", municipio:"Sant Joan de les Fonts", sector:"Food and Beverage"},
+  {empresa:"Beveland", municipio:"Sant Joan de Les Fonts", sector:"Food and Beverage"},
   {empresa:"Biosearch", municipio:"La Jonquera", sector:"Nutrition and Pharma"},
   {empresa:"Fundador", municipio:"Jerez de la Frontera", sector:"Food and Beverage"},
-  {empresa:"Osborne", municipio:"El Puerto de Santa María", sector:"Food and Beverage"},
+  {empresa:"Osborne", municipio:"El Puerto de Santa Maria", sector:"Food and Beverage"},
   {empresa:"Sanviver", municipio:"Fuenlabrada", sector:"Food and Beverage"},
   {empresa:"Williams and Humbert", municipio:"Jerez de la Frontera", sector:"Food and Beverage"},
   {empresa:"Cruz Conde", municipio:"Montilla", sector:"Food and Beverage"},
@@ -97,7 +83,7 @@ const CLIENTES = [
   {empresa:"Luis Caballero", municipio:"Cádiz", sector:"Food and Beverage"},
   {empresa:"Manuel Vieira", municipio:"Torres Novas", sector:"Detergence and Chemistry"},
   {empresa:"Marie Brizard", municipio:"Zizurkil", sector:"Food and Beverage"},
-  {empresa:"Miguel Torres", municipio:"Vilafranca del Penedès", sector:"Food and Beverage"},
+  {empresa:"Miguel Torres", municipio:"Vilafranca del Penedés", sector:"Food and Beverage"},
   {empresa:"Mixer and Pack", municipio:"Meco", sector:"Perfume and Cosmetic"},
   {empresa:"Aragonesa de Disolventes", municipio:"Zaragoza", sector:"Detergence and Chemistry"},
   {empresa:"Disolventes y Alcoholes del Ebro", municipio:"Zaragoza", sector:"Detergence and Chemistry"},
@@ -105,7 +91,7 @@ const CLIENTES = [
   {empresa:"Pernod Ricard España", municipio:"Padrón", sector:"Food and Beverage"},
   {empresa:"Productos Capilares L´Oreal", municipio:"Villalonquejar", sector:"Perfume and Cosmetic"},
   {empresa:"Quimi Romar", municipio:"Náquera", sector:"Detergence and Chemistry"},
-  {empresa:"Rives", municipio:"El Puerto de Santa María", sector:"Food and Beverage"},
+  {empresa:"Rives", municipio:"El Puerto de Santa Maria", sector:"Food and Beverage"},
   {empresa:"SAEQSA", municipio:"Alfajarín", sector:"Detergence and Chemistry"},
   {empresa:"Sanofi Aventis", municipio:"Riells i Viabrea", sector:"Nutrition and Pharma"},
   {empresa:"Stockmeier", municipio:"Sentmenat", sector:"Detergence and Chemistry"},
@@ -117,68 +103,52 @@ const CLIENTES = [
   {empresa:"Zoco Pharmaceutical", municipio:"Dicastillo", sector:"Nutrition and Pharma"}
 ];
 
-// ---------------------------------------------------------
+// Coordenadas estimadas -- algunas incluidas, otras vacías
+const MUNICIPIO_COORDS = {
+  "Barcelona": {lat:41.3879, lon:2.1699},
+  "Córdoba": {lat:37.8847, lon:-4.7791},
+  "Jerez de la Frontera": {lat:36.6864, lon:-6.1360},
+  "El Puerto de Santa Maria": {lat:36.5939, lon:-6.2320},
+  "Murcia": {lat:37.9922, lon:-1.1307},
+  "Fuenlabrada": {lat:40.2842, lon:-3.7942},
+  "Valdemoro": {lat:40.1920, lon:-3.6789},
+  "Zaragoza": {lat:41.6490, lon:-0.8891},
+  "Logroño": {lat:42.4663, lon:-2.4487},
+  "Toledo": {lat:39.8628, lon:-4.0273},
+  "Almería": {lat:36.8340, lon:-2.4620}
+  // ... el resto de municipios irán apareciendo en el mensaje de error si faltan
+};
 
 const map = L.map('map').setView([40, -3.7], 5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
-const statusEl = document.getElementById('status');
 
-const colorPorSector = (s) => ({
+const colorPorSector = s => ({
   "Perfume and Cosmetic":"#1f77b4",
   "Food and Beverage":"#d62728",
   "Detergence and Chemistry":"#2ca02c",
   "Nutrition and Pharma":"#9467bd"
 }[s] || "#777");
 
-// Agrupar por municipio
-const porMunicipio = {};
+let count = 0;
+const missing = new Set();
+
 CLIENTES.forEach(c => {
-  porMunicipio[c.municipio] = porMunicipio[c.municipio] || [];
-  porMunicipio[c.municipio].push(c);
+  const muni = c.municipio.trim();
+  const coord = MUNICIPIO_COORDS[muni];
+  if (!coord) {
+    missing.add(muni);
+    return;
+  }
+  const lat = coord.lat;
+  const lon = coord.lon;
+  const color = colorPorSector(c.sector);
+  const mk = L.circleMarker([lat, lon], {radius:6, color, fillColor:color, fillOpacity:0.9}).addTo(map);
+  mk.bindPopup(`<b>${c.empresa}</b><br>${c.municipio}<br>${c.sector}`);
+  count++;
 });
 
-// Función de “dispersión” de puntos cuando coinciden
-const jitter = (baseLat, baseLon, i, n) => {
-  const radius = Math.min(0.01 + n*0.0012, 0.035); // ~1km máx aprox
-  const angle = (2*Math.PI/n) * i;
-  return [
-    baseLat + radius * Math.cos(angle),
-    baseLon + radius * Math.sin(angle)
-  ];
-};
-
-async function geocode(muni){
-  const q = encodeURIComponent(muni + ", España OR Portugal");
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`;
-  const res = await fetch(url);
-  const json = await res.json();
-  if (json && json[0]) return {lat:+json[0].lat, lon:+json[0].lon};
-  return null;
-}
-
-(async function pintar(){
-  let puestos = 0;
-  const municipios = Object.keys(porMunicipio);
-
-  for (let m of municipios){
-    statusEl.textContent = "Buscando: " + m;
-    const loc = await geocode(m);
-    if (!loc) continue;
-
-    const lista = porMunicipio[m];
-    lista.forEach((c, i) => {
-      const [lat, lon] = lista.length>1 ? jitter(loc.lat, loc.lon, i, lista.length) : [loc.lat, loc.lon];
-      const color = colorPorSector(c.sector);
-      const mk = L.circleMarker([lat, lon], {radius:6, color, fillColor:color, fillOpacity:.9}).addTo(map);
-      mk.bindPopup(`<b>${c.empresa}</b><br>${c.municipio}<br>${c.sector}`);
-      puestos++;
-    });
-
-    await new Promise(r=>setTimeout(r, 900)); // respetar el servicio de mapas
-  }
-
-  statusEl.textContent = `Listo: ${puestos} clientes colocados en el mapa.`;
-})();
+document.getElementById('status').innerText =
+  `Clientes colocados: ${count}. Municipios sin coordenadas: ${[...missing].join(", ")}`;
 </script>
 </body>
 </html>
