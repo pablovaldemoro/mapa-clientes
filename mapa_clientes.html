@@ -4,14 +4,20 @@
   <meta charset="utf-8"/>
   <title>Mapa de Clientes – España</title>
 
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     html, body { height:100%; margin:0; font-family: system-ui, -apple-system, "Segoe UI", Arial; }
-    header { background:#222; color:#fff; padding:10px 14px; }
-    header h1 { margin:0; font-size:18px; }
-    #map { height: calc(100% - 56px); }
+    header {
+      background:#222; color:#fff; padding:10px 14px;
+      display:flex; flex-direction:column; gap:4px;
+    }
+    header h1 { font-size:18px; margin:0; }
+    #status { font-size:13px; color:#ddd; }
+    #map { height: calc(100% - 70px); }
+
     .legend {
       position:absolute; bottom:12px; left:12px; background:#fff; padding:8px 10px;
       border-radius:6px; box-shadow:0 1px 4px rgba(0,0,0,.3); font-size:12px; z-index:1000;
@@ -21,10 +27,14 @@
   </style>
 </head>
 <body>
+
 <header>
   <h1>Mapa de Clientes – España</h1>
+  <div id="status">Cargando clientes…</div>
 </header>
+
 <div id="map"></div>
+
 <div class="legend">
   <strong>Leyenda</strong>
   <div class="legend-item"><div class="legend-color" style="background:#1f77b4;"></div>Perfume and Cosmetic</div>
@@ -34,7 +44,7 @@
 </div>
 
 <script>
-// CLIENTES
+// ------------------ CLIENTES (del Word) ------------------
 const CLIENTES = [
   {empresa:"Aguardientes de Galicia", municipio:"Vedra", sector:"Food and Beverage"},
   {empresa:"Alcoholera Catalana", municipio:"Santa Margarida i Els Monjos", sector:"Detergence and Chemistry"},
@@ -57,7 +67,7 @@ const CLIENTES = [
   {empresa:"Sanviver", municipio:"Fuenlabrada", sector:"Food and Beverage"},
   {empresa:"Williams and Humbert", municipio:"Jerez de la Frontera", sector:"Food and Beverage"},
   {empresa:"Cruz Conde", municipio:"Montilla", sector:"Food and Beverage"},
-  {empresa:"Briseis", municipio:"Almería", sector:"Perfume and Cosmetic"},
+  {empresa:"Briseis", municipio:"Almeria", sector:"Perfume and Cosmetic"},
   {empresa:"Caves da Montanha", municipio:"Anadia", sector:"Food and Beverage"},
   {empresa:"Cogrami Canarias", municipio:"Ingenio", sector:"Food and Beverage"},
   {empresa:"Colep", municipio:"Vale de Cambra", sector:"Perfume and Cosmetic"},
@@ -95,9 +105,9 @@ const CLIENTES = [
   {empresa:"Parque Logistico Carmona", municipio:"Carmona", sector:"Food and Beverage"},
   {empresa:"Pernod Ricard España", municipio:"Padrón", sector:"Food and Beverage"},
   {empresa:"Productos Capilares L´Oreal", municipio:"Villalonquejar", sector:"Perfume and Cosmetic"},
-  {empresa:"Quimi Romar", municipio:"Náquera", sector:"Detergence and Chemistry"},
+  {empresa:"Quimi Romar", municipio:"Naquera", sector:"Detergence and Chemistry"},
   {empresa:"Rives", municipio:"El Puerto de Santa Maria", sector:"Food and Beverage"},
-  {empresa:"SAEQSA", municipio:"Alfajarín", sector:"Detergence and Chemistry"},
+  {empresa:"SAEQSA", municipio:"Alfajarin", sector:"Detergence and Chemistry"},
   {empresa:"Sanofi Aventis", municipio:"Riells i Viabrea", sector:"Nutrition and Pharma"},
   {empresa:"Stockmeier", municipio:"Sentmenat", sector:"Detergence and Chemistry"},
   {empresa:"Tecnoquimica Extremeña", municipio:"Guareña", sector:"Detergence and Chemistry"},
@@ -108,84 +118,138 @@ const CLIENTES = [
   {empresa:"Zoco Pharmaceutical", municipio:"Dicastillo", sector:"Nutrition and Pharma"}
 ];
 
-// Coordenadas estimadas
+// ------------------ COORDENADAS APROXIMADAS ------------------
+// (puedes afinarlas más adelante si quieres)
 const MUNICIPIO_COORDS = {
-  "Barcelona": {lat:41.3879, lon:2.1699},
-  "Córdoba": {lat:37.8847, lon:-4.7791},
-  "Jerez de la Frontera": {lat:36.6864, lon:-6.1360},
-  "El Puerto de Santa Maria": {lat:36.5939, lon:-6.2320},
-  "Murcia": {lat:37.9922, lon:-1.1307},
-  "Fuenlabrada": {lat:40.2842, lon:-3.7942},
-  "Valdemoro": {lat:40.1920, lon:-3.6789},
-  "Zaragoza": {lat:41.6490, lon:-0.8891},
-  "Logroño": {lat:42.4663, lon:-2.4487},
-  "Toledo": {lat:39.8628, lon:-4.0273},
-  "Almería": {lat:36.8340, lon:-2.4620},
-  "Albacete": {lat:38.9943, lon:-1.8564},
-  "Getafe": {lat:40.3080, lon:-3.7320},
-  "Alcoy": {lat:38.7069, lon:-0.4733},
-  "Cádiz": {lat:36.5271, lon:-6.2886},
-  "Antequera": {lat:37.0194, lon:-4.5625},
-  "Almendralejo": {lat:38.6496, lon:-6.3992},
-  "Burgos": {lat:42.3430, lon:-3.6969},
-  "Cartagena": {lat:37.6257, lon:-0.9962},
-  "Guareña": {lat:38.9750, lon:-6.5028},
-  "Carmona": {lat:37.4738, lon:-5.6020},
-  "Getafe": {lat:40.3080, lon:-3.7320},
-  "Cheste": {lat:39.4911, lon:-0.6050},
-  "Quart de Poblet": {lat:39.4923, lon:-0.4539},
-  "Aldaia": {lat:39.4569, lon:-0.4563},
-  "Alcantarilla": {lat:38.0403, lon:-1.2266},
-  "Atarfe": {lat:37.2724, lon:-3.6050},
-  "Molina de Segura": {lat:38.0333, lon:-1.1780},
-  "Madrigueras": {lat:38.9150, lon:-1.4500},
-  "Rute": {lat:37.4101, lon:-4.3908},
-  "Montilla": {lat:37.5454, lon:-4.6715},
-  "Alcoy": {lat:38.7069, lon:-0.4733},
-  "Albacete": {lat:38.9943, lon:-1.8564},
-  "Mollet del Valles": {lat:41.5388, lon:2.2600},
-  "Sant Joan de les Fonts": {lat:42.1323, lon:2.6435},
-  "Vilafranca del Penedés": {lat:41.3500, lon:1.6970},
-  "Sentmenat": {lat:41.5900, lon:2.0490},
-  "Riells i Viabrea": {lat:41.7880, lon:2.5070},
-  "Gélida": {lat:41.3900, lon:1.8140},
-  "Alfajarin": {lat:41.6110, lon:-0.7820},
-  "Náquera": {lat:39.6300, lon:-0.4000},
-  "Chiva": {lat:39.4450, lon:-0.7430},
-  "Torrijos": {lat:39.9400, lon:-4.3430},
-  "Padrón": {lat:42.7330, lon:-8.6300},
-  "Vilamalla": {lat:42.3030, lon:2.9510},
-  "Zizurkil": {lat:43.1930, lon:-2.0450},
-  "Alcalá de Henares": {lat:40.4810, lon:-3.3640},
-  "San Fernando de Henares": {lat:40.4600, lon:-3.5190},
-  "Lousã": {lat:40.1550, lon:-8.1930},
-  "Anadia": {lat:40.4167, lon:-8.3233},
-  "Vale de Cambra": {lat:40.8390, lon:-8.1570},
-  "Torres Novas": {lat:39.4787, lon:-8.2338},
-  "Ingenio": {lat:27.9233, lon:-15.4481}
-  // Puedes añadir más si quieres más precisión
+  "Vedra": {lat:42.78, lon:-8.49},
+  "Santa Margarida i Els Monjos": {lat:41.31, lon:1.65},
+  "Córdoba": {lat:37.88, lon:-4.78},
+  "Barcelona": {lat:41.39, lon:2.17},
+  "Aldaia": {lat:39.46, lon:-0.46},
+  "Marratxí": {lat:39.63, lon:2.76},
+  "Mollet del Valles": {lat:41.54, lon:2.21},
+  "Gélida": {lat:41.44, lon:1.86},
+  "Valverde de Majano": {lat:40.96, lon:-4.24},
+  "Tres Cantos": {lat:40.61, lon:-3.71},
+  "Murcia": {lat:37.99, lon:-1.13},
+  "Cheste": {lat:39.47, lon:-0.61},
+  "Quart de Poblet": {lat:39.48, lon:-0.44},
+  "Sant Joan de Les Fonts": {lat:42.20, lon:2.52},
+  "La Jonquera": {lat:42.42, lon:2.87},
+  "Jerez de la Frontera": {lat:36.69, lon:-6.14},
+  "El Puerto de Santa Maria": {lat:36.60, lon:-6.23},
+  "Fuenlabrada": {lat:40.28, lon:-3.80},
+  "Montilla": {lat:37.58, lon:-4.64},
+  "Almeria": {lat:36.83, lon:-2.46},
+  "Anadia": {lat:40.44, lon:-8.44},
+  "Ingenio": {lat:27.93, lon:-15.44},
+  "Vale de Cambra": {lat:40.86, lon:-8.39},
+  "Granollers": {lat:41.61, lon:2.29},
+  "Antequera": {lat:37.02, lon:-4.56},
+  "Cotimunde": {lat:42.87, lon:-8.55},  // aproximado cerca de Santiago
+  "Almendralejo": {lat:38.69, lon:-6.40},
+  "Atarfe": {lat:37.22, lon:-3.69},
+  "Alcantarilla": {lat:37.97, lon:-1.22},
+  "Cartagena": {lat:37.63, lon:-0.99},
+  "Sartaguda": {lat:42.33, lon:-2.06},
+  "Zuera": {lat:41.87, lon:-0.78},
+  "Alcanena": {lat:39.46, lon:-8.67},
+  "Molina de Segura": {lat:38.05, lon:-1.21},
+  "Madrigueras": {lat:39.23, lon:-1.80},
+  "Rute": {lat:37.33, lon:-4.37},
+  "Toledo": {lat:39.86, lon:-4.02},
+  "Valdemoro": {lat:40.19, lon:-3.68},
+  "Lousa": {lat:40.12, lon:-8.25},
+  "Getafe": {lat:40.30, lon:-3.73},
+  "San Fernando de Henares": {lat:40.43, lon:-3.53},
+  "Albacete": {lat:38.99, lon:-1.86},
+  "Alcoy": {lat:38.70, lon:-0.47},
+  "Cádiz": {lat:36.53, lon:-6.29},
+  "Torres Novas": {lat:39.48, lon:-8.23},
+  "Zizurkil": {lat:43.18, lon:-2.05},
+  "Vilafranca del Penedés": {lat:41.35, lon:1.70},
+  "Meco": {lat:40.55, lon:-3.30},
+  "Zaragoza": {lat:41.65, lon:-0.88},
+  "Carmona": {lat:37.47, lon:-5.64},
+  "Padrón": {lat:42.74, lon:-8.66},
+  "Villalonquejar": {lat:42.36, lon:-3.75}, // polígono en Burgos
+  "Naquera": {lat:39.66, lon:-0.42},
+  "Alfajarin": {lat:41.61, lon:-0.72},
+  "Riells i Viabrea": {lat:41.78, lon:2.52},
+  "Sentmenat": {lat:41.61, lon:2.08},
+  "Guareña": {lat:38.86, lon:-6.10},
+  "Chiva": {lat:39.47, lon:-0.71},
+  "Logroño": {lat:42.47, lon:-2.45},
+  "Torrijos": {lat:39.98, lon:-4.28},
+  "Vilamalla": {lat:42.25, lon:2.96},
+  "Dicastillo": {lat:42.60, lon:-1.94},
+  "Mérida": {lat:38.92, lon:-6.34} // por si lo necesitas después
 };
 
-const map = L.map('map').setView([39.5, -4.0], 5);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+// ------------------ LÓGICA DEL MAPA ------------------
+const map = L.map('map').setView([40, -4], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18
+}).addTo(map);
 
-const colorPorSector = s => ({
+const statusEl = document.getElementById('status');
+
+const colorPorSector = (s) => ({
   "Perfume and Cosmetic":"#1f77b4",
   "Food and Beverage":"#d62728",
   "Detergence and Chemistry":"#2ca02c",
   "Nutrition and Pharma":"#9467bd"
 }[s] || "#777");
 
-CLIENTES.forEach((c, i) => {
+// Agrupar clientes por municipio
+const grupos = {};
+CLIENTES.forEach(c => {
   const muni = c.municipio.trim();
-  const coord = MUNICIPIO_COORDS[muni];
-  if (!coord) {
-    console.warn("Sin coordenadas:", muni);
+  if (!MUNICIPIO_COORDS[muni]) {
+    console.warn("Faltan coordenadas para municipio:", muni);
     return;
   }
-  const mk = L.circleMarker([coord.lat, coord.lon], {radius:6, color: colorPorSector(c.sector), fillColor: colorPorSector(c.sector), fillOpacity:0.9}).addTo(map);
-  mk.bindPopup(`<b>${c.empresa}</b><br>${c.municipio}<br>${c.sector}`);
+  if (!grupos[muni]) grupos[muni] = [];
+  grupos[muni].push(c);
 });
+
+// función para "separar" pines si hay varios en el mismo municipio
+function jitterAround(lat, lon, index, total) {
+  if (total === 1) return [lat, lon];
+  const baseRadius = 0.08;   // radio básico (grados) ~ 5–8 km
+  const radius = baseRadius * (0.7 + total*0.07); // crece un poco con el nº de clientes
+  const angle = (2 * Math.PI * index) / total;
+  const dx = radius * Math.cos(angle);
+  const dy = radius * Math.sin(angle);
+  return [lat + dy, lon + dx];
+}
+
+let totalPines = 0;
+
+Object.entries(grupos).forEach(([muni, lista]) => {
+  const { lat, lon } = MUNICIPIO_COORDS[muni];
+  lista.forEach((c, i) => {
+    const [jLat, jLon] = jitterAround(lat, lon, i, lista.length);
+    const color = colorPorSector(c.sector);
+    const marker = L.circleMarker([jLat, jLon], {
+      radius: 6,
+      color,
+      fillColor: color,
+      fillOpacity: 0.9
+    }).addTo(map);
+
+    marker.bindPopup(
+      `<b>${c.empresa}</b><br>` +
+      `${c.municipio}<br>` +
+      `<i>${c.sector}</i>`
+    );
+
+    totalPines++;
+  });
+});
+
+statusEl.textContent = `Clientes colocados en el mapa: ${totalPines} (agrupados por municipio con dispersión).`;
 </script>
+
 </body>
 </html>
